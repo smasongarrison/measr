@@ -66,8 +66,9 @@ Here we use the Examination of Certificate of Proficiency in English (ECPE; [Tem
 ```{r est-model, eval = FALSE}
 library(measr)
 
-model <- measr_dcm(data = ecpe_data, resp_id = "resp_id",
-                   qmatrix = ecpe_qmatrix, item_id = "item_id")
+model <-measr_dcm(data = ecpe_data, qmatrix = ecpe_qmatrix,
+                        resp_id = "resp_id", item_id = "item_id",
+                        method = "optim", type = "lcdm")
 ```
 
 Once a model has been estimated, we can then add and evaluate model fit.
@@ -75,6 +76,26 @@ This can done through absolute model fit, relative model fit (information criter
 Model parameters, respondent classifications, and results of the model fit analyses can then be extracted using `measr_extract()`.
 
 ```{r evl-model, eval = FALSE}
+model <- add_fit(model, method = "m2")
+model <- add_reliability(model)
+
+measr_extract(model, "m2")
+#> # A tibble: 1 × 3
+#>      m2    df     pval
+#>   <dbl> <int>    <dbl>
+#> 1  506.   325 4.39e-10
+```
+
+Models can be estimated using Stan's optimizer, or full Markov chain Monte Carlo (MCMC). 
+Note that the MCMC method takes considerably longer, but they allow you to add relative fit criteria using "add_criterion"
+
+```{r est-modelmcmc, eval = FALSE}
+library(measr)
+
+model <- measr_dcm(data = ecpe_data, resp_id = "resp_id",
+                   qmatrix = ecpe_qmatrix, item_id = "item_id",
+                        method = "mcmc", type = "lcdm")
+
 model <- add_fit(model, method = "m2")
 model <- add_criterion(model, criterion = "loo")
 model <- add_reliability(model)
@@ -85,8 +106,6 @@ measr_extract(model, "m2")
 #>   <dbl> <int>    <dbl>
 #> 1  506.   325 4.37e-10
 ```
-
-
 ---
 
 Please note that the measr project is released with a [Contributor Code of Conduct](https://measr.info/CODE_OF_CONDUCT.html). By contributing to this project, you agree to abide by its terms.
