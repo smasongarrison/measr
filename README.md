@@ -78,8 +78,9 @@ data (see `?ecpe` for details).
 ``` r
 library(measr)
 
-model <- measr_dcm(data = ecpe_data, resp_id = "resp_id",
-                   qmatrix = ecpe_qmatrix, item_id = "item_id")
+model <-measr_dcm(data = ecpe_data, qmatrix = ecpe_qmatrix,
+                        resp_id = "resp_id", item_id = "item_id",
+                        method = "optim", type = "lcdm")
 ```
 
 Once a model has been estimated, we can then add and evaluate model fit.
@@ -89,6 +90,27 @@ respondent classifications, and results of the model fit analyses can
 then be extracted using `measr_extract()`.
 
 ``` r
+model <- add_fit(model, method = "m2")
+model <- add_reliability(model)
+
+measr_extract(model, "m2")
+#> # A tibble: 1 × 3
+#>      m2    df     pval
+#>   <dbl> <int>    <dbl>
+#> 1  506.   325 4.39e-10
+```
+
+Models can be estimated using Stan’s optimizer, or full Markov chain
+Monte Carlo (MCMC). Note that the MCMC method takes considerably longer,
+but they allow you to add relative fit criteria using “add_criterion”
+
+``` r
+library(measr)
+
+model <- measr_dcm(data = ecpe_data, resp_id = "resp_id",
+                   qmatrix = ecpe_qmatrix, item_id = "item_id",
+                        method = "mcmc", type = "lcdm")
+
 model <- add_fit(model, method = "m2")
 model <- add_criterion(model, criterion = "loo")
 model <- add_reliability(model)
